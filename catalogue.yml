@@ -62,19 +62,24 @@
         src: catalogue.service
         dest: /etc/systemd/system/catalogue.service
 
-    - name: load master data
-      community.mongodb.mongodb_shell:
-        file: /app/db/master-data.js
-        login_host: mongodb-dev.sandeepkumar0088.online
-        idempotent: yes
+#    - name: load master data
+#      community.mongodb.mongodb_shell:
+#        file: /app/db/master-data.js
+#        login_host: mongodb-dev.sandeepkumar0088.online
+#        idempotent: yes
+
+    - name: install mongodb shell
+      ansible.builtin.dnf:
+        name: mongodb-mongosh
+        state: present
 
     - name: copy repo file
       ansible.builtin.copy:
         path: mongo.repo
         dest: /etc/yum.repos.d/mongo.repo
 
-
-
+    - name: load master data
+      ansible.builtin.shell: mongosh --host mongodb-dev.sandeepkumar0088.online </app/db/master-data.js
 
     - name: restart catalogue
       ansible.builtin.dnf:

@@ -22,3 +22,21 @@
       ansible.builtin.dnf:
         name: '@nginx:1.24'
         state: present
+    - name: remove html directory
+      ansible.builtin.file:
+        path: /usr/share/nginx/html
+        state: absent
+    - name: add html directory
+      ansible.builtin.file:
+        path: /usr/share/nginx/html
+        state: directory
+    - name: download nd extract the content
+      ansible.builtin.unarchive:
+        src: https://roboshop-artifacts.s3.amazonaws.com/frontend-v3.zip
+        dest: /usr/share/nginx/html
+        remote_src: yes
+    - name: Enable nd start nginx
+      ansible.builtin.systemd_service:
+        name: nginx
+        enable: true
+        state: restarted

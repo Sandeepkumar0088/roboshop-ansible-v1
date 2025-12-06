@@ -1,0 +1,83 @@
+#dnf module disable nodejs -y
+#dnf module enable nodejs:20 -y
+#
+#dnf install nodejs -y
+#
+#useradd roboshop
+#
+#mkdir /app
+#
+#cp catalogue.service /etc/systemd/system/catalogue.service
+#cp mongo.repo /etc/yum.repos.d/mongo.repo
+#
+#curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
+#cd /app
+#unzip /tmp/catalogue.zip
+#
+#npm install
+#
+#dnf install mongodb-mongosh -y
+#
+#mongosh --host mongodb-dev.sandeepkumar0088.online </app/db/master-data.js
+#systemctl enable catalogue
+#systemctl restart catalogue
+
+- name: catalogue setup
+  hosts: all
+  become: true
+  tasks:
+    - name: install nodejs:20
+      ansible.builtin.dnf:
+        name: '@nodejs:20'
+        state: present
+
+    - name: add user
+      ansible.builtin.user:
+        name: roboshop
+
+    - name: remove app directory
+      ansible.builtin.file:
+        path: /app
+        state: absent
+
+    - name: add app directory
+      ansible.builtin.file:
+        path: /app
+        state: directory
+
+
+    - name: download nd extract file
+      ansible.builtin.unarchive:
+        src: https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
+        dest: /app
+        remote_src: yes
+
+    - name: install packages based on package.json
+      community.general.npm:
+        path: /app
+
+
+    - name: copy file
+      ansible.builtin.copy:
+        src: catalogue.service
+        dest: /etc/systemd/system/catalogue.service
+
+    - name: load master data
+      community.mongodb.mongodb_shell:
+        file: /app/db/master-data.js
+        login_host: mongodb-dev.sandeepkumar0088.online
+        idempotent: yes
+
+    - name: copy repo file
+      ansible.builtin.copy:
+        path: mongo.repo
+        dest: /etc/yum.repos.d/mongo.repo
+
+
+
+    - name: restart catalogue
+      ansible.builtin.dnf:
+        name: catalogue
+        enabled: true
+        state: restarted
+        daemon_reload: true

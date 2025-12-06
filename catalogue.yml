@@ -81,7 +81,7 @@
       ansible.builtin.shell: mongosh --host mongodb-dev.sandeepkumar0088.online </app/db/master-data.js
 
     - name: restart catalogue
-      ansible.builtin.dnf:
+      ansible.builtin.systemd_service:
         state: restarted
         name: catalogue
         enabled: true

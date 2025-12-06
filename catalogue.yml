@@ -56,8 +56,12 @@
       community.general.npm:
         path: /app
 
+    - name: copy repo file
+      ansible.builtin.copy:
+        src: mongo.repo
+        dest: /etc/yum.repos.d/mongo.repo
 
-    - name: copy file
+    - name: copy catalogue file
       ansible.builtin.copy:
         src: catalogue.service
         dest: /etc/systemd/system/catalogue.service
@@ -67,10 +71,6 @@
 #        file: /app/db/master-data.js
 #        login_host: mongodb-dev.sandeepkumar0088.online
 #        idempotent: yes
-    - name: copy repo file
-      ansible.builtin.copy:
-        src: mongo.repo
-        dest: /etc/yum.repos.d/mongo.repo
 
     - name: install mongodb shell
       ansible.builtin.dnf:

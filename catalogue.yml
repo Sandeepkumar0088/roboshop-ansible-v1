@@ -82,7 +82,7 @@
 
     - name: restart catalogue
       ansible.builtin.dnf:
+        state: restarted
         name: catalogue
         enabled: true
-        state: restarted
         daemon_reload: true

@@ -56,15 +56,17 @@
       community.general.npm:
         path: /app
 
+    - name: copy catalogue file
+      ansible.builtin.copy:
+        src: catalogue.service
+        dest: /etc/systemd/system/catalogue.service
+
     - name: copy repo file
       ansible.builtin.copy:
         src: mongo.repo
         dest: /etc/yum.repos.d/mongo.repo
 
-    - name: copy catalogue file
-      ansible.builtin.copy:
-        src: catalogue.service
-        dest: /etc/systemd/system/catalogue.service
+
 
 #    - name: load master data
 #      community.mongodb.mongodb_shell:

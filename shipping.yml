@@ -1,0 +1,78 @@
+#dnf install maven -y
+#
+#useradd roboshop
+#
+#cp shipping.service /etc/systemd/system/shipping.service
+#
+#mkdir /app
+#
+#curl -L -o /tmp/shipping.zip https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip
+#cd /app
+#unzip /tmp/shipping.zip
+#
+#cd /app
+#mvn clean package
+#mv target/shipping-1.0.jar shipping.jar
+#
+#dnf install mysql -y
+#
+#mysql -h mysql-dev.sandeepkumar0088.online -uroot -pRoboShop@1 < /app/db/schema.sql
+#
+#mysql -h mysql-dev.sandeepkumar0088.online -uroot -pRoboShop@1 < /app/db/app-user.sql
+#
+#mysql -h mysql-dev.sandeepkumar0088.online -uroot -pRoboShop@1 < /app/db/master-data.sql
+#
+#systemctl daemon-reload
+#systemctl enable shipping
+#systemctl start shipping
+
+- name: shipping setup
+  hosts: all
+  become: true
+  tasks:
+    - name: install maven
+      ansible.builtin.dnf:
+        name: maven
+        state: present
+    - name: add roboshop user
+      ansible.buitin.user:
+        name: roboshop
+    - name: remove app directory
+      ansible.builtin.file:
+        path: /app
+        state: absent
+    - name: add app directory
+      ansible.builtin.file:
+        path: /app
+        state: directory
+    - name: download nd extract the file
+      ansible.builtin.unarchive:
+        src: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip
+        dest: /app
+        remote_src: yes
+    - name: clean package
+      ansible.builtin.shell: cd /app -e mvn clean package -e mv target/shipping-1.0.jar shipping.jar
+    - name: copy shipping service file
+      ansible.builtin.copy:
+        src: shipping.service
+        dest: /etc/systemd/system/shipping.service
+    - name: install mysql
+      ansible.builtin.dnf:
+        name: mysql
+        state: present
+
+    - name: load schema
+      ansible.builtin.shell: mysql -h mysql-dev.sandeepkumar0088.online -uroot -pRoboShop@1 < /app/db/schema.sql
+
+    - name: create app user
+      ansible.builtin.shell: mysql -h mysql-dev.sandeepkumar0088.online -uroot -pRoboShop@1 < /app/db/schema.sql
+
+    - name: load master data
+      ansible.builtin.shell: mysql -h mysql-dev.sandeepkumar0088.online -uroot -pRoboShop@1 < /app/db/schema.sql
+
+    - name: restart nd reload
+      ansible.builtin.systemd_service:
+        state: restarted
+        name: shipping
+        enabled: true
+        daemon_reload: true

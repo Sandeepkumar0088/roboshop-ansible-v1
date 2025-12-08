@@ -75,7 +75,6 @@
     - name: load master data
       ansible.builtin.shell: mysql -h mysql-dev.sandeepkumar0088.online -uroot -pRoboShop@1 < /app/db/schema.sql
 
-
 #    - name: load schema
 #      community.mysql.mysql_db:
 #        state: import

@@ -1,0 +1,29 @@
+#cp rabbitmq.repo /etc/yum.repos.d/rabbitmq.repo
+#dnf install rabbitmq-server -y
+#rabbitmqctl add_user roboshop roboshop123
+#rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"
+#systemctl enable rabbitmq-server
+#systemctl start rabbitmq-server
+
+- name: rabbitmq setup
+  hosts: all
+  become: true
+  tasks:
+    - name: copy repo file
+      ansible.builtin.copy:
+        src: rabbitmq.repo
+        dest: /etc/yum.repos.d/rabbitmq.repo
+
+    - name: install rabbitmq-server
+      ansible.builtin.dnf:
+        name: rabbitmq-server
+        state: present
+
+    - name: add roboshop user with password
+      ansible.builtin.shell: rabbitmqctl add_user roboshop roboshop123 ; rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"
+
+    - name: enable and restart
+      ansible.builtin.systemd_service:
+        state: restarted
+        name: rabbitmq-server
+        enabled: true
